@@ -90,13 +90,14 @@ require ["Celestrium"], (Celestrium) ->
 
     #"NodeSearch": 
     #  prefetch: "/node_names"
-    "local/VisualSearch": {}
 
     MiniMap: {}  
 
     Stats: {}
 
     #"local/OverlayCreate": {}
+
+    "local/VisualSearch": {}
 
     "local/TopBarCreate": {}
 
