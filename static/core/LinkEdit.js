@@ -62,6 +62,8 @@
                 makeLinks = value + " \"" + _this.graphView.findText(link.source) + "\"";
               } else if (property === "end" && _this.graphView.findText(link.target)) {
                 makeLinks = value + " \"" + _this.graphView.findText(link.target) + "\"";
+              } else if (property === "_Last_Edit_Date" || property === "_Creation_Date") {
+                makeLinks = value.substring(4, 21);
               } else if (value != null) {
                 makeLinks = value.replace(/((https?|ftp|dict):[^'">\s]+)/gi, "<a href=\"$1\" target=\"_blank\" style=\"target-new: tab;\">$1</a>");
               } else {
@@ -135,6 +137,7 @@
               savedLink['source'] = link['source'];
               savedLink['target'] = link['target'];
               savedLink['strength'] = link['strength'];
+              savedLink['_Creation_Date'] = link['_Creation_Date'];
               _this.graphModel.filterLinks(function(link) {
                 return !(savedLink['_id'] === link['_id']);
               });
