@@ -2,12 +2,19 @@
 (function() {
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   define([], function() {
     var LinkEdit;
     return LinkEdit = (function(_super) {
+      var colors, hexColors;
+
       __extends(LinkEdit, _super);
+
+      colors = ["darkgray", "aqua", "black", "blue", "darkblue", "fuchsia", "green", "darkgreen", "lime", "maroon", "navy", "olive", "orange", "purple", "red", "silver", "teal", "yellow"];
+
+      hexColors = ["#A9A9A9", "#00FFFF", "#000000", "#0000FF", "#00008B", "#FF00FF", "#008000", "#006400", "#00FF00", "#800000", "#000080", "#808000", "#FFA500", "#800080", "#FF0000", "#C0C0C0", "#008080", "#FFFF00"];
 
       function LinkEdit(options) {
         this.options = options;
@@ -42,7 +49,7 @@
         $container = $("<div class=\"node-profile-helper\"/>").appendTo(this.$el);
         blacklist = ["selected", "source", "target", "strength", "_type"];
         return _.each(selectedLinks, function(link) {
-          var $linkDiv, $linkEdit, header;
+          var $linkDeselect, $linkDiv, $linkEdit, header;
           console.log(link);
           $linkDiv = $("<div class=\"node-profile\"/>").appendTo($container);
           header = _this.findHeader(link);
@@ -62,29 +69,55 @@
               } else {
                 makeLinks = value;
               }
-              return $("<div class=\"node-profile-property\">" + property + ": " + makeLinks + "</div>").appendTo($linkDiv);
+              if (property === "_Last_Edit_Date" || property === "_Creation_Date") {
+                return $("<div class=\"node-profile-property\">" + property + ": " + (makeLinks.substring(4, 21)) + "</div>").appendTo($linkDiv);
+              } else if (property === "color") {
+                return $("<div class=\"node-profile-property\">" + property + ": " + colors[hexColors.indexOf(makeLinks.toUpperCase())] + "</div>").appendTo($linkDiv);
+              } else {
+                return $("<div class=\"node-profile-property\">" + property + ": " + makeLinks + "</div>").appendTo($linkDiv);
+              }
             }
           });
           $linkEdit = $("<input id=\"LinkEditButton" + link['_id'] + "\" class=\"LinkEditButton\" type=\"button\" value=\"Edit this link\">").appendTo($linkDiv);
-          return $linkEdit.click(function() {
+          $linkEdit.click(function() {
             return _this.editLink(link, $linkDiv, blacklist);
+          });
+          $linkDeselect = $("<input id=\"LinkDeselectButton" + link['_id'] + "\" class=\"LinkDeselectButton\" type=\"button\" value=\"Deselect this link\">").appendTo($linkDiv);
+          return $linkDeselect.click(function() {
+            return _this.selection.toggleSelection(link);
           });
         });
       };
 
       LinkEdit.prototype.editLink = function(link, linkDiv, blacklist) {
-        var $linkCancel, $linkDelete, $linkMoreFields, $linkSave, linkInputNumber,
+        var $linkCancel, $linkDelete, $linkMoreFields, $linkSave, colorEditingField, linkInputNumber, origColor,
           _this = this;
         console.log("Editing link: " + link['_id']);
+        origColor = "#A9A9A9";
         linkInputNumber = 0;
         linkDiv.html("<div class=\"node-profile-title\">Editing " + (this.findHeader(link)) + "</div><form id=\"Link" + link['_id'] + "EditForm\"></form>");
         _.each(link, function(value, property) {
           var newEditingFields;
-          if (blacklist.indexOf(property) < 0 && ["_id", "_Last_Edit_Date", "_Creation_Date", "start", "end"].indexOf(property) < 0) {
+          if (blacklist.indexOf(property) < 0 && ["_id", "_Last_Edit_Date", "_Creation_Date", "start", "end", "color"].indexOf(property) < 0) {
             newEditingFields = "<div id=\"Link" + link['_id'] + "EditDiv" + linkInputNumber + "\" class=\"Link" + link['_id'] + "EditDiv\">\n  <input style=\"width:80px\" id=\"Link" + link['_id'] + "EditProperty" + linkInputNumber + "\" value=\"" + property + "\" class=\"propertyLink" + link['_id'] + "Edit\"/> \n  <input style=\"width:80px\" id=\"Link" + link['_id'] + "EditValue" + linkInputNumber + "\" value=\"" + value + "\" class=\"valueLink" + link['_id'] + "Edit\"/> \n  <input type=\"button\" id=\"removeLink" + link['_id'] + "Edit" + linkInputNumber + "\" value=\"x\" onclick=\"this.parentNode.parentNode.removeChild(this.parentNode);\">\n</div>";
             $(newEditingFields).appendTo("#Link" + link['_id'] + "EditForm");
             return linkInputNumber = linkInputNumber + 1;
+          } else if (property === "color") {
+            if (__indexOf.call(colors, value) >= 0) {
+              return origColor = hexColors[colors.indexOf(value)];
+            } else if (__indexOf.call(hexColors, origColor) >= 0) {
+              return origColor = value;
+            }
           }
+        });
+        colorEditingField = '\
+            <form action="#" method="post">\
+                <div class="controlset">Color<input id="color' + link['_id'] + '" name="color' + link['_id'] + '" type="text" value="' + origColor + '"/></div>\
+            </form>\
+          ';
+        $(colorEditingField).appendTo(linkDiv);
+        $("#color" + link['_id']).colorPicker({
+          showHexField: false
         });
         $linkMoreFields = $("<input id=\"moreLink" + link['_id'] + "EditFields\" type=\"button\" value=\"+\">").appendTo(linkDiv);
         $linkMoreFields.click(function() {
@@ -98,6 +131,8 @@
           if (newLinkObj[0]) {
             newLink = newLinkObj[1];
             newLink['_id'] = link['_id'];
+            newLink['color'] = $("#color" + link['_id']).val();
+            newLink['_Creation_Date'] = link['_Creation_Date'];
             return _this.dataController.linkEdit(link, newLink, function(savedLink) {
               savedLink['_id'] = link['_id'];
               savedLink['_type'] = link['_type'];
@@ -138,6 +173,8 @@
           if (blacklist.indexOf(property) < 0) {
             if (property === "_Last_Edit_Date" || property === "_Creation_Date") {
               return $("<div class=\"node-profile-property\">" + property + ":  " + (value.substring(4, 21)) + "</div>").appendTo(linkDiv);
+            } else if (property === "color") {
+              return $("<div class=\"node-profile-property\">" + property + ":  " + colors[hexColors.indexOf(value.toUpperCase())] + "</div>").appendTo(linkDiv);
             } else {
               return $("<div class=\"node-profile-property\">" + property + ":  " + value + "</div>").appendTo(linkDiv);
             }

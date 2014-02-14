@@ -8,7 +8,13 @@
   define([], function() {
     var NodeEdit;
     return NodeEdit = (function(_super) {
+      var colors, hexColors;
+
       __extends(NodeEdit, _super);
+
+      colors = ["darkgray", "aqua", "black", "blue", "darkblue", "fuchsia", "green", "darkgreen", "lime", "maroon", "navy", "olive", "orange", "purple", "red", "silver", "teal", "yellow"];
+
+      hexColors = ["#A9A9A9", "#00FFFF", "#000000", "#0000FF", "#00008B", "#FF00FF", "#008000", "#006400", "#00FF00", "#800000", "#000080", "#808000", "#FFA500", "#800080", "#FF0000", "#C0C0C0", "#008080", "#FFFF00"];
 
       function NodeEdit(options) {
         this.options = options;
@@ -41,7 +47,7 @@
         $container = $("<div class=\"node-profile-helper\"/>").appendTo(this.$el);
         blacklist = ["index", "x", "y", "px", "py", "fixed", "selected", "weight"];
         return _.each(selectedNodes, function(node) {
-          var $nodeDiv, $nodeEdit, header;
+          var $nodeDeselect, $nodeDiv, $nodeEdit, header;
           $nodeDiv = $("<div class=\"node-profile\"/>").appendTo($container);
           header = _this.findHeader(node);
           $("<div class=\"node-profile-title\">" + header + "</div>").appendTo($nodeDiv);
@@ -56,26 +62,31 @@
               }
               if (property === "_Last_Edit_Date" || property === "_Creation_Date") {
                 return $("<div class=\"node-profile-property\">" + property + ":  " + (makeLinks.substring(4, 21)) + "</div>").appendTo($nodeDiv);
-              } else if (property !== "color") {
+              } else if (property === "color") {
+                return $("<div class=\"node-profile-property\">" + property + ":  " + colors[hexColors.indexOf(makeLinks.toUpperCase())] + "</div>").appendTo($nodeDiv);
+              } else {
                 return $("<div class=\"node-profile-property\">" + property + ":  " + makeLinks + "</div>").appendTo($nodeDiv);
               }
             }
           });
           $nodeEdit = $("<input id=\"NodeEditButton" + node['_id'] + "\" class=\"NodeEditButton\" type=\"button\" value=\"Edit this node\">").appendTo($nodeDiv);
-          return $nodeEdit.click(function() {
+          $nodeEdit.click(function() {
             return _this.editNode(node, $nodeDiv, blacklist);
+          });
+          $nodeDeselect = $("<input id=\"NodeDeselectButton" + node['_id'] + "\" class=\"NodeDeselectButton\" type=\"button\" value=\"Deselect this node\">").appendTo($nodeDiv);
+          return $nodeDeselect.click(function() {
+            return _this.selection.toggleSelection(node);
           });
         });
       };
 
       NodeEdit.prototype.editNode = function(node, nodeDiv, blacklist) {
-        var $nodeCancel, $nodeDelete, $nodeMoreFields, $nodeSave, colorEditingField, colors, header, hexColors, nodeInputNumber, origColor,
+        var $nodeCancel, $nodeDelete, $nodeMoreFields, $nodeSave, colorEditingField, header, nodeInputNumber, origColor,
           _this = this;
+        console.log(node.color);
         console.log("Editing node: " + node['_id']);
         nodeInputNumber = 0;
         origColor = "#A9A9A9";
-        colors = ["darkgray", "aqua", "black", "blue", "darkblue", "fuchsia", "green", "darkgreen", "lime", "maroon", "navy", "olive", "orange", "purple", "red", "silver", "teal", "yellow"];
-        hexColors = ["#A9A9A9", "#00FFFF", "#000000", "#0000FF", "#00008B", "#FF00FF", "#008000", "#006400", "#00FF00", "#800000", "#000080", "#808000", "#FFA500", "#800080", "#FF0000", "#C0C0C0", "#008080", "#FFFF00"];
         header = this.findHeader(node);
         nodeDiv.html("<div class=\"node-profile-title\">Editing " + header + " (id: " + node['_id'] + ")</div><form id=\"Node" + node['_id'] + "EditForm\"></form>");
         _.each(node, function(value, property) {
@@ -140,21 +151,27 @@
       };
 
       NodeEdit.prototype.cancelEditing = function(node, nodeDiv, blacklist) {
-        var $nodeEdit,
+        var $nodeDeselect, $nodeEdit,
           _this = this;
         nodeDiv.html("<div class=\"node-profile-title\">" + (this.findHeader(node)) + "</div>");
         _.each(node, function(value, property) {
           if (blacklist.indexOf(property) < 0) {
             if (property === "_Last_Edit_Date" || property === "_Creation_Date") {
               return $("<div class=\"node-profile-property\">" + property + ":  " + (value.substring(4, 21)) + "</div>").appendTo(nodeDiv);
-            } else if (property !== "color") {
+            } else if (property === "color") {
+              return $("<div class=\"node-profile-property\">" + property + ":  " + colors[hexColors.indexOf(value.toUpperCase())] + "</div>").appendTo(nodeDiv);
+            } else {
               return $("<div class=\"node-profile-property\">" + property + ":  " + value + "</div>").appendTo(nodeDiv);
             }
           }
         });
         $nodeEdit = $("<input id=\"NodeEditButton" + node['_id'] + "\" class=\"NodeEditButton\" type=\"button\" value=\"Edit this node\">").appendTo(nodeDiv);
-        return $nodeEdit.click(function() {
+        $nodeEdit.click(function() {
           return _this.editNode(node, nodeDiv, blacklist);
+        });
+        $nodeDeselect = $("<input id=\"NodeDeselectButton" + node['_id'] + "\" class=\"NodeDeselectButton\" type=\"button\" value=\"Deselect this node\">").appendTo(nodeDiv);
+        return $nodeDeselect.click(function() {
+          return _this.selection.toggleSelection(node);
         });
       };
 

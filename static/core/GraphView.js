@@ -76,7 +76,7 @@
         defs.append("marker").attr("id", "Triangle").attr("viewBox", "0 0 20 15").attr("refX", "20").attr("refY", "5").attr("markerUnits", "userSpaceOnUse").attr("markerWidth", "20").attr("markerHeight", "15").attr("orient", "auto").append("path").attr("d", "M 0 0 L 10 5 L 0 10 z");
         defs.append("marker").attr("id", "Triangle2").attr("viewBox", "0 0 20 15").attr("refX", "-5").attr("refY", "5").attr("markerUnits", "userSpaceOnUse").attr("markerWidth", "20").attr("markerHeight", "15").attr("orient", "auto").append("path").attr("d", "M 10 0 L 0 5 L 10 10 z");
         gradient = defs.append("radialGradient");
-        gradient.attr("id", "gradFill").attr("cx", "50%").attr("cy", "50%").attr("r", "75%").attr("fx", "50%").attr("fy", "50%").append("stop").attr("offset", "0%").attr("style", "stop-color:steelblue;stop-opacity:1");
+        gradient.attr("id", "gradFill").attr("cx", "50%").attr("cy", "50%").attr("r", "75%").attr("fx", "50%").attr("fy", "50%").append("stop").attr("offset", "0%").attr("style", "stop-color:blue;stop-opacity:1");
         gradient.append("stop").attr("offset", "100%").attr("style", "stop-color:rgb(255,255,255);stop-opacity:1");
         zoomCapture = svg.append("g");
         zoomCapture.append("svg:rect").attr("width", "100%").attr("height", "100%").style("fill-opacity", "0%");
@@ -114,14 +114,23 @@
       };
 
       GraphView.prototype.update = function() {
-        var clickSemaphore, filteredLinks, getColor, getSize, link, linkEnter, links, node, nodeEnter, nodes,
+        var clickSemaphore, filteredLinks, getColor, getLinkColor, getSize, link, linkEnter, links, node, nodeEnter, nodes,
           _this = this;
+        getLinkColor = function(link) {
+          if (link.color != null) {
+            return link.color;
+          } else {
+            return "grey";
+          }
+        };
         nodes = this.model.get("nodes");
         links = this.model.get("links");
         filteredLinks = this.linkFilter ? this.linkFilter.filter(links) : links;
         this.force.nodes(nodes).links(filteredLinks).start();
         link = this.linkSelection = d3.select(this.el).select(".linkContainer").selectAll(".link").data(filteredLinks, this.model.get("linkHash"));
-        linkEnter = link.enter().append("line").attr("class", "link").attr("stroke", "grey").attr('marker-end', function(link) {
+        linkEnter = link.enter().append("line").attr("class", "link").attr("stroke", function(d) {
+          return getLinkColor(d);
+        }).attr('marker-end', function(link) {
           return 'url(#Triangle)';
         }).attr('marker-start', function(link) {
           if (link.direction === 'backward' || link.direction === 'bidirectional') {
