@@ -26,6 +26,7 @@ define [], () ->
 
       @Create = instances['local/Create']
 
+
     update: ->
       @$el.empty()
       selectedNodes = @selection.getSelectedNodes()
@@ -55,6 +56,10 @@ define [], () ->
           @editNode(node, $nodeDiv, blacklist)
           )
 
+        $nodeDeselect = $("<input id=\"NodeDeselectButton#{node['_id']}\" class=\"NodeDeselectButton\" type=\"button\" value=\"Deselect this node\">").appendTo $nodeDiv
+        $nodeDeselect.click(() =>
+          @selection.toggleSelection(node)
+          )
           
 
     editNode: (node, nodeDiv, blacklist) ->
@@ -138,6 +143,10 @@ define [], () ->
       $nodeEdit = $("<input id=\"NodeEditButton#{node['_id']}\" class=\"NodeEditButton\" type=\"button\" value=\"Edit this node\">").appendTo nodeDiv
       $nodeEdit.click(() =>
         @editNode(node, nodeDiv, blacklist)
+        )
+      $nodeDeselect = $("<input id=\"NodeDeselectButton#{node['_id']}\" class=\"NodeDeselectButton\" type=\"button\" value=\"Deselect this node\">").appendTo nodeDiv
+      $nodeDeselect.click(() =>
+        @selection.toggleSelection(node)
         )
 
     deleteNode: (delNode, callback)=>

@@ -66,6 +66,11 @@ define [], () ->
           @editLink(link, $linkDiv, blacklist)
           )
 
+        $linkDeselect = $("<input id=\"LinkDeselectButton#{link['_id']}\" class=\"LinkDeselectButton\" type=\"button\" value=\"Deselect this link\">").appendTo $linkDiv
+        $linkDeselect.click(() =>
+          @selection.toggleSelection(link)
+          )
+
     editLink: (link, linkDiv, blacklist) =>
           console.log "Editing link: " + link['_id']
           origColor = "#A9A9A9" #TODO: map this to the CSS file color choice for node color

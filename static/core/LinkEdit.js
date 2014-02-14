@@ -49,7 +49,7 @@
         $container = $("<div class=\"node-profile-helper\"/>").appendTo(this.$el);
         blacklist = ["selected", "source", "target", "strength", "_type"];
         return _.each(selectedLinks, function(link) {
-          var $linkDiv, $linkEdit, header;
+          var $linkDeselect, $linkDiv, $linkEdit, header;
           console.log(link);
           $linkDiv = $("<div class=\"node-profile\"/>").appendTo($container);
           header = _this.findHeader(link);
@@ -79,8 +79,12 @@
             }
           });
           $linkEdit = $("<input id=\"LinkEditButton" + link['_id'] + "\" class=\"LinkEditButton\" type=\"button\" value=\"Edit this link\">").appendTo($linkDiv);
-          return $linkEdit.click(function() {
+          $linkEdit.click(function() {
             return _this.editLink(link, $linkDiv, blacklist);
+          });
+          $linkDeselect = $("<input id=\"LinkDeselectButton" + link['_id'] + "\" class=\"LinkDeselectButton\" type=\"button\" value=\"Deselect this link\">").appendTo($linkDiv);
+          return $linkDeselect.click(function() {
+            return _this.selection.toggleSelection(link);
           });
         });
       };

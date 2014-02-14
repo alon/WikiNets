@@ -47,7 +47,7 @@
         $container = $("<div class=\"node-profile-helper\"/>").appendTo(this.$el);
         blacklist = ["index", "x", "y", "px", "py", "fixed", "selected", "weight"];
         return _.each(selectedNodes, function(node) {
-          var $nodeDiv, $nodeEdit, header;
+          var $nodeDeselect, $nodeDiv, $nodeEdit, header;
           $nodeDiv = $("<div class=\"node-profile\"/>").appendTo($container);
           header = _this.findHeader(node);
           $("<div class=\"node-profile-title\">" + header + "</div>").appendTo($nodeDiv);
@@ -70,8 +70,12 @@
             }
           });
           $nodeEdit = $("<input id=\"NodeEditButton" + node['_id'] + "\" class=\"NodeEditButton\" type=\"button\" value=\"Edit this node\">").appendTo($nodeDiv);
-          return $nodeEdit.click(function() {
+          $nodeEdit.click(function() {
             return _this.editNode(node, $nodeDiv, blacklist);
+          });
+          $nodeDeselect = $("<input id=\"NodeDeselectButton" + node['_id'] + "\" class=\"NodeDeselectButton\" type=\"button\" value=\"Deselect this node\">").appendTo($nodeDiv);
+          return $nodeDeselect.click(function() {
+            return _this.selection.toggleSelection(node);
           });
         });
       };
@@ -147,7 +151,7 @@
       };
 
       NodeEdit.prototype.cancelEditing = function(node, nodeDiv, blacklist) {
-        var $nodeEdit,
+        var $nodeDeselect, $nodeEdit,
           _this = this;
         nodeDiv.html("<div class=\"node-profile-title\">" + (this.findHeader(node)) + "</div>");
         _.each(node, function(value, property) {
@@ -162,8 +166,12 @@
           }
         });
         $nodeEdit = $("<input id=\"NodeEditButton" + node['_id'] + "\" class=\"NodeEditButton\" type=\"button\" value=\"Edit this node\">").appendTo(nodeDiv);
-        return $nodeEdit.click(function() {
+        $nodeEdit.click(function() {
           return _this.editNode(node, nodeDiv, blacklist);
+        });
+        $nodeDeselect = $("<input id=\"NodeDeselectButton" + node['_id'] + "\" class=\"NodeDeselectButton\" type=\"button\" value=\"Deselect this node\">").appendTo(nodeDiv);
+        return $nodeDeselect.click(function() {
+          return _this.selection.toggleSelection(node);
         });
       };
 
