@@ -141,7 +141,9 @@ define [], () ->
         else @trigger "view:click"
 
       #Center node on shift+click
-      #@addCentering()
+      @addCentering()
+      @drawXHairs(initialWindowWidth/2,initialWindowHeight/2,svg)
+      
 
       return this
 
@@ -266,20 +268,36 @@ define [], () ->
       #   ), @loadtime
 
     addCentering: () ->
-      width = $(@el).width()
-      height = $(@el).height() 
+      width=@initialWindowWidth
+      height=@initialWindowHeight
+      #width = $(@el).width()
+      # height = $(@el).height() 
 
-      translateParams=[0,0]
+      
            
-      @on "enter:node:shift:click", (node) ->
+      @on "enter:node:click", (node) ->
         x = node.x
         y = node.y
         scale = @zoom.scale()
-        translateParams = [(width/2 -x)/scale,(height/2-y)/scale]
+        console.log(x)
+        translateParams = [(@initialWindowWidth/2 -x)/scale,(@initialWindowHeight/2-y)/scale]
         #translateParams = [x,y]
         #update translate values
         @zoom.translate([translateParams[0], translateParams[1]])
         @workspace.transition().ease("linear").attr "transform", "translate(#{translateParams}) scale(#{scale})"
+
+
+      ###@on "enter:node:click", (node) ->
+        x = node.x
+        y = node.y
+        scale = @zoom.scale()
+        translateParams = [(width/2 -x)/scale,(height/2-y)/scale]
+
+        #update translate values
+        @zoom.translate([translateParams[0], translateParams[1]])
+
+        @workspace.transition().ease("linear").attr "transform", "translate(#{translateParams}) scale(#{scale})"
+###
 
     #fast-forward force graph rendering to prevent bouncing http://stackoverflow.com/questions/13463053/calm-down-initial-tick-of-a-force-layout  
     # forwardAlpha: (layout, alpha, max) ->

@@ -109,6 +109,8 @@
             return _this.trigger("view:click");
           }
         });
+        this.addCentering();
+        this.drawXHairs(initialWindowWidth / 2, initialWindowHeight / 2, svg);
         return this;
       };
 
@@ -230,19 +232,31 @@
       };
 
       GraphView.prototype.addCentering = function() {
-        var height, translateParams, width;
-        width = $(this.el).width();
-        height = $(this.el).height();
-        translateParams = [0, 0];
-        return this.on("enter:node:shift:click", function(node) {
-          var scale, x, y;
+        var height, width;
+        width = this.initialWindowWidth;
+        height = this.initialWindowHeight;
+        return this.on("enter:node:click", function(node) {
+          var scale, translateParams, x, y;
           x = node.x;
           y = node.y;
           scale = this.zoom.scale();
-          translateParams = [(width / 2 - x) / scale, (height / 2 - y) / scale];
+          console.log(x);
+          translateParams = [(this.initialWindowWidth / 2 - x) / scale, (this.initialWindowHeight / 2 - y) / scale];
           this.zoom.translate([translateParams[0], translateParams[1]]);
           return this.workspace.transition().ease("linear").attr("transform", "translate(" + translateParams + ") scale(" + scale + ")");
         });
+        /*@on "enter:node:click", (node) ->
+          x = node.x
+          y = node.y
+          scale = @zoom.scale()
+          translateParams = [(width/2 -x)/scale,(height/2-y)/scale]
+        
+          #update translate values
+          @zoom.translate([translateParams[0], translateParams[1]])
+        
+          @workspace.transition().ease("linear").attr "transform", "translate(#{translateParams}) scale(#{scale})"
+        */
+
       };
 
       GraphView.prototype.drawXHairs = function(x, y, obj) {
